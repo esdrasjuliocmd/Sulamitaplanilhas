@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Planilhas Google Sheets Sulamita</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 50%, #6C5B7B 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+        }
+
+        .logo {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+
+        .owner {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        main {
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            border-top: 6px solid #FF6B9D;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.5);
+        }
+
+        .step-label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .step.active .step-label {
+            color: #FF6B9D;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 3px;
+            background: #e0e0e0;
+            margin: 0 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        #sheets-url {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        #sheets-url:focus {
+            outline: none;
+            border-color: #FF6B9D;
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+        }
+
+        .example {
+            background: #FFF0F5;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 25px;
+            border-left: 4px solid #FF6B9D;
+        }
+
+        .example strong {
+            color: #FF6B9D;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: normal;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .options input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #FF6B9D;
+        }
+
+        .btn-primary, .btn-success, .btn-secondary {
+            width: 100%;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.6);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #FF6B9D;
+            border: 2px solid #FF6B9D;
+        }
+
+        .btn-secondary:hover {
+            background: #FF6B9D;
+            color: white;
+        }
+
+        .btn-icon {
+            font-size: 1.3em;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #FF6B9D;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        #loading-status {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B9D 0%, #C06C84 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .success-section, .error-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .error-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success-section h2, .error-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .success-section p, .error-section p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .file-info {
+            background: #FFF0F5;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: left;
+            border: 2px solid #FFE4E1;
+        }
+
+        .info-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #FFE4E1;
+            font-size: 1.1em;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item strong {
+            color: #FF6B9D;
+            margin-right: 10px;
+        }
+
+        .error-solutions {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #ffc107;
+            text-align: left;
+        }
+
+        .error-solutions h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .error-solutions ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .error-solutions li {
+            margin-bottom: 8px;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid #FF6B9D;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .info-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            color: #FF6B9D;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .info-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .how-to {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-top: 6px solid #FF6B9D;
+        }
+
+        .how-to h2 {
+            text-align: center;
+            color: #FF6B9D;
+            margin-bottom: 40px;
+            font-size: 2em;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .how-step {
+            text-align: center;
+        }
+
+        .how-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+        }
+
+        .how-step h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .how-step p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px 20px;
+            font-size: 0.95em;
+        }
+
+        .footer-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content strong {
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            background: rgba(255, 107, 157, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+            
+            .step-indicator {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .step-line {
+                width: 3px;
+                height: 30px;
+                margin: 0;
+            }
+
+            .watermark {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">📊 ✨ 📈</div>
+            <h1>Conversor Planilhas Google Sheets</h1>
+            <p class="subtitle">Sulamita</p>
+            <div class="owner">👤 Uso Exclusivo: Sulamita Naves</div>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="step-indicator">
+                    <div class="step active" id="step1-indicator">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Cole o Link</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step2-indicator">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Converter</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step3-indicator">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Download</span>
+                    </div>
+                </div>
+
+                <div class="input-section" id="input-section">
+                    <label for="sheets-url">Cole o link da sua planilha do Google Sheets:</label>
+                    <input 
+                        type="text" 
+                        id="sheets-url" 
+                        placeholder="https://docs.google.com/spreadsheets/d/1ABC123.../edit"
+                    >
+                    
+                    <div class="example">
+                        <strong>Exemplo:</strong> https://docs.google.com/spreadsheets/d/1gFD6lyObwzzRNy7J5mN1HfqgnnWuVgHfVg0mPJxAKjc/edit
+                    </div>
+
+                    <div class="options">
+                        <label>
+                            <input type="checkbox" id="preserve-formatting" checked>
+                            ✨ Preservar formatação (cores, bordas, fontes)
+                        </label>
+                        <label>
+                            <input type="checkbox" id="preserve-validations" checked>
+                            📋 Preservar caixas suspensas (validações)
+                        </label>
+                    </div>
+
+                    <button class="btn-primary" onclick="iniciarConversao()">
+                        <span class="btn-icon">🚀</span>
+                        Converter para Excel
+                    </button>
+                </div>
+
+                <div class="loading-section hidden" id="loading-section">
+                    <div class="loader"></div>
+                    <h3>Convertendo sua planilha...</h3>
+                    <p id="loading-status">Conectando ao Google Sheets...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="success-section hidden" id="success-section">
+                    <div class="success-icon">✅</div>
+                    <h2>Conversão Concluída com Sucesso!</h2>
+                    <p>Seu arquivo Excel está pronto, Sulamita!</p>
+                    
+                    <div class="file-info">
+                        <div class="info-item">
+                            <strong>📄 Nome:</strong> <span id="file-name">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>📦 Tamanho:</strong> <span id="file-size">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>📑 Abas:</strong> <span id="sheet-count">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>👤 Convertido por:</strong> Sulamita Naves
+                        </div>
+                    </div>
+
+                    <button class="btn-success" onclick="baixarArquivo()">
+                        <span class="btn-icon">⬇️</span>
+                        Baixar Excel
+                    </button>
+
+                    <button class="btn-secondary" onclick="resetar()">
+                        Converter Outra Planilha
+                    </button>
+                </div>
+
+                <div class="error-section hidden" id="error-section">
+                    <div class="error-icon">❌</div>
+                    <h2>Erro na Conversão</h2>
+                    <p id="error-message">Ocorreu um erro ao processar sua planilha.</p>
+                    
+                    <div class="error-solutions">
+                        <h3>💡 Possíveis soluções:</h3>
+                        <ul>
+                            <li>Verifique se o link está correto e completo</li>
+                            <li>Certifique-se que a planilha está com permissão "Qualquer pessoa com o link pode visualizar"</li>
+                            <li>Tente abrir a planilha no navegador para confirmar que existe</li>
+                            <li>Aguarde alguns segundos e tente novamente</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn-secondary" onclick="resetar()">
+                        ↻ Tentar Novamente
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="info-icon">🎨</div>
+                    <h3>Preserva Formatação</h3>
+                    <p>Cores, bordas, fontes e todos os estilos visuais são mantidos intactos</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">📋</div>
+                    <h3>Caixas Suspensas</h3>
+                    <p>Validações de dados e listas suspensas são recriadas automaticamente</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">⚡</div>
+                    <h3>Rápido e Seguro</h3>
+                    <p>Conversão instantânea sem armazenamento de dados</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🔒</div>
+                    <h3>Uso Exclusivo</h3>
+                    <p>Ferramenta personalizada para Sulamita Naves</p>
+                </div>
+            </div>
+
+            <div class="how-to">
+                <h2>📖 Como usar?</h2>
+                <div class="steps-grid">
+                    <div class="how-step">
+                        <div class="how-number">1</div>
+                        <h4>Abra sua planilha</h4>
+                        <p>Acesse sua planilha no Google Sheets pelo navegador</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="how-number">2</div>
+                        <h4>Torne pública</h4>
+                        <p>Clique em "Compartilhar" e mude para "Qualquer pessoa com o link"</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="how-number">3</div>
+                        <h4>Copie o link</h4>
+                        <p>Copie a URL completa da barra de endereços do navegador</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="how-number">4</div>
+                        <h4>Cole e converta</h4>
+                        <p>Cole o link acima e clique em "Converter para Excel"</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <strong>📊 Conversor Planilhas Google Sheets Sulamita</strong>
+                <p>Ferramenta de uso exclusivo para Sulamita Naves</p>
+                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                    ✨ Desenvolvido especialmente para otimizar seu trabalho com planilhas
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <div class="watermark">
+        💎 Sulamita Naves
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        // Variáveis globais
+        let arquivoExcel = null;
+        let nomeArquivo = '';
+
+        // Adicionar marca d'água no nome do arquivo
+        const USUARIO = 'SulamitaNaves';
+
+        // Extrair ID do Google Sheets da URL
+        function extrairIdPlanilha(url) {
+            const regex = /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        // Atualizar indicadores de progresso
+        function atualizarStep(stepNumber) {
+            document.querySelectorAll('.step').forEach((step, index) => {
+                if (index + 1 <= stepNumber) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        // Atualizar status de carregamento
+        function atualizarStatus(mensagem, progresso) {
+            document.getElementById('loading-status').textContent = mensagem;
+            document.getElementById('progress-fill').style.width = progresso + '%';
+        }
+
+        // Mostrar seção
+        function mostrarSecao(secao) {
+            document.querySelectorAll('.input-section, .loading-section, .success-section, .error-section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            document.getElementById(secao).classList.remove('hidden');
+        }
+
+        // Iniciar conversão
+        async function iniciarConversao() {
+            const url = document.getElementById('sheets-url').value.trim();
+            
+            if (!url) {
+                alert('⚠️ Por favor, cole o link da planilha!');
+                return;
+            }
+            
+            const spreadsheetId = extrairIdPlanilha(url);
+            
+            if (!spreadsheetId) {
+                mostrarErro('❌ Link inválido! Certifique-se de colar o link completo do Google Sheets.');
+                return;
+            }
+            
+            // Atualizar UI
+            atualizarStep(2);
+            mostrarSecao('loading-section');
+            
+            try {
+                // Passo 1: Buscar dados
+                atualizarStatus('🔗 Conectando ao Google Sheets...', 10);
+                await sleep(500);
+                
+                // Passo 2: Obter dados da planilha
+                atualizarStatus('📥 Baixando dados da planilha...', 30);
+                const dados = await obterDadosPlanilha(spreadsheetId);
+                
+                // Passo 3: Processar dados
+                atualizarStatus('🎨 Processando formatação...', 50);
+                await sleep(500);
+                
+                // Passo 4: Criar Excel
+                atualizarStatus('📊 Criando arquivo Excel...', 70);
+                const workbook = dados.workbook;
+                
+                // Passo 5: Gerar arquivo
+                atualizarStatus('✨ Finalizando conversão...', 90);
+                arquivoExcel = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                nomeArquivo = `${dados.nome}_${USUARIO}_${getDataHora()}.xlsx`;
+                
+                atualizarStatus('✅ Concluído!', 100);
+                await sleep(500);
+                
+                // Mostrar sucesso
+                atualizarStep(3);
+                mostrarSucesso(dados);
+                
+            } catch (erro) {
+                console.error('Erro:', erro);
+                mostrarErro(erro.message || 'Erro ao processar a planilha. Verifique se ela está pública.');
+            }
+        }
+
+        // Obter dados da planilha via exportação direta
+        async function obterDadosPlanilha(spreadsheetId) {
+            try {
+                const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=xlsx`;
+                
+                const response = await fetch(exportUrl, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('⚠️ Não foi possível acessar a planilha.\n\n📋 Certifique-se que:\n\n1. ✅ O link está correto\n2. 🔓 A planilha está com permissão "Qualquer pessoa com o link pode visualizar"\n\n💡 Como tornar pública:\n- Abra a planilha\n- Clique em "Compartilhar"\n- Mude para "Qualquer pessoa com o link"');
+                }
+                
+                const blob = await response.blob();
+                const arrayBuffer = await blob.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                
+                return {
+                    nome: `Planilha_${spreadsheetId.substring(0, 8)}`,
+                    abas: workbook.SheetNames.length,
+                    tamanho: formatarTamanho(blob.size),
+                    workbook: workbook
+                };
+                
+            } catch (erro) {
+                throw erro;
+            }
+        }
+
+        // Baixar arquivo
+        function baixarArquivo() {
+            const blob = new Blob([arquivoExcel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomeArquivo;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // Mostrar sucesso
+        function mostrarSucesso(dados) {
+            document.getElementById('file-name').textContent = nomeArquivo;
+            document.getElementById('file-size').textContent = dados.tamanho;
+            document.getElementById('sheet-count').textContent = dados.abas;
+            mostrarSecao('success-section');
+        }
+
+        // Mostrar erro
+        function mostrarErro(mensagem) {
+            document.getElementById('error-message').textContent = mensagem;
+            mostrarSecao('error-section');
+            atualizarStep(1);
+        }
+
+        // Resetar formulário
+        function resetar() {
+            document.getElementById('sheets-url').value = '';
+            arquivoExcel = null;
+            nomeArquivo = '';
+            atualizarStep(1);
+            mostrarSecao('input-section');
+        }
+
+        // Funções auxiliares
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function getDataHora() {
+            const agora = new Date();
+            return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}_${String(agora.getHours()).padStart(2, '0')}-${String(agora.getMinutes()).padStart(2, '0')}-${String(agora.getSeconds()).padStart(2, '0')}`;
+        }
+
+        function formatarTamanho(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('sheets-url').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    iniciarConversao();
+                }
+            });
+
+            // Log de uso
+            console.log('%c📊 Conversor Planilhas Google Sheets Sulamita', 'color: #FF6B9D; font-size: 20px; font-weight: bold;');
+            console.log('%c👤 Uso Exclusivo: Sulamita Naves', 'color: #C06C84; font-size: 14px;');
+            console.log('%c✨ Versão personalizada desenvolvida especialmente para otimização de trabalho', 'color: #6C5B7B; font-size: 12px;');
+        });
+    </script>
+</body>
+</html>
